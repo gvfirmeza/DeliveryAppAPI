@@ -20,97 +20,89 @@ type BSTProdutos struct {
 }
 
 func (bst *BSTProdutos) AdicionarProduto(produto *Produto) {
-	nodo := &Nodo{Produto: produto}
+	novoNodo := &Nodo{Produto: produto}
 	if bst.Raiz == nil {
-		bst.Raiz = nodo
+		bst.Raiz = novoNodo
 	} else {
-		bst.Raiz.adicionar(nodo)
+		adicionarNodo(bst.Raiz, novoNodo)
 	}
 }
 
-func (n *Nodo) adicionar(novoNodo *Nodo) {
-	if novoNodo.Produto.Nome < n.Produto.Nome {
-		if n.Esq == nil {
-			n.Esq = novoNodo
+func adicionarNodo(atual, novo *Nodo) {
+	if novo.Produto.Nome < atual.Produto.Nome {
+		if atual.Esq == nil {
+			atual.Esq = novo
 		} else {
-			n.Esq.adicionar(novoNodo)
+			adicionarNodo(atual.Esq, novo)
 		}
 	} else {
-		if n.Dir == nil {
-			n.Dir = novoNodo
+		if atual.Dir == nil {
+			atual.Dir = novo
 		} else {
-			n.Dir.adicionar(novoNodo)
+			adicionarNodo(atual.Dir, novo)
 		}
 	}
 }
 
 func (bst *BSTProdutos) BuscarProdutoByID(id int) (*Produto, error) {
-	return bst.Raiz.buscarByID(id)
+	return buscarPorID(bst.Raiz, id)
 }
 
-func (n *Nodo) buscarByID(id int) (*Produto, error) {
-	if n == nil {
+func buscarPorID(nodo *Nodo, id int) (*Produto, error) {
+	if nodo == nil {
 		return nil, errors.New("produto não encontrado")
 	}
-	if n.Produto.ID == id {
-		return n.Produto, nil
+	if nodo.Produto.ID == id {
+		return nodo.Produto, nil
 	}
-	if produto, err := n.Esq.buscarByID(id); err == nil {
+	produto, err := buscarPorID(nodo.Esq, id)
+	if err == nil {
 		return produto, nil
 	}
-	return n.Dir.buscarByID(id)
+	return buscarPorID(nodo.Dir, id)
 }
 
 func (bst *BSTProdutos) RemoverProduto(id int) {
-	bst.Raiz = bst.Raiz.remover(id)
+	bst.Raiz = removerNodo(bst.Raiz, id)
 }
 
-func (n *Nodo) remover(id int) *Nodo {
-	if n == nil {
+func removerNodo(nodo *Nodo, id int) *Nodo {
+	if nodo == nil {
 		return nil
 	}
-	if id < n.Produto.ID {
-		n.Esq = n.Esq.remover(id)
-		return n
+	if id < nodo.Produto.ID {
+		nodo.Esq = removerNodo(nodo.Esq, id)
+		return nodo
 	}
-	if id > n.Produto.ID {
-		n.Dir = n.Dir.remover(id)
-		return n
+	if id > nodo.Produto.ID {
+		nodo.Dir = removerNodo(nodo.Dir, id)
+		return nodo
 	}
-	if n.Esq == nil && n.Dir == nil {
-		return nil
+	if nodo.Esq == nil {
+		return nodo.Dir
 	}
-	if n.Esq == nil {
-		return n.Dir
+	if nodo.Dir == nil {
+		return nodo.Esq
 	}
-	if n.Dir == nil {
-		return n.Esq
+	sucessor := nodo.Dir
+	for sucessor.Esq != nil {
+		sucessor = sucessor.Esq
 	}
-
-	menorDireita := n.Dir.encontrarMin()
-	n.Produto = menorDireita.Produto
-	n.Dir = n.Dir.remover(menorDireita.Produto.ID)
-	return n
-}
-
-func (n *Nodo) encontrarMin() *Nodo {
-	if n.Esq == nil {
-		return n
-	}
-	return n.Esq.encontrarMin()
+	nodo.Produto = sucessor.Produto
+	nodo.Dir = removerNodo(nodo.Dir, sucessor.Produto.ID)
+	return nodo
 }
 
 func (bst *BSTProdutos) ListarProdutos() []*Produto {
 	var produtos []*Produto
-	bst.Raiz.inOrder(&produtos)
+	inOrderTraversal(bst.Raiz, &produtos)
 	return produtos
 }
 
-func (n *Nodo) inOrder(produtos *[]*Produto) {
-	if n == nil {
-		return
+func inOrderTraversal(nodo *Nodo, produtos *[]*Produto) {
+	if nodo != nil {
+		inOrderTraversal(nodo.Esq, produtos)
+		*produtos = append(*produtos, nodo.Produto)
+		inOrderTraversal(nodo.Dir, produtos)
 	}
-	n.Esq.inOrder(produtos)
-	*produtos = append(*produtos, n.Produto)
-	n.Dir.inOrder(produtos)
 }
