@@ -20,13 +20,12 @@ func AdicionarProduto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// att metricas
 	metricas.MetricasSistema.TotalProdutos++
 
 	varID++
 	novoProduto.ID = varID
 
-	produtos.LProdutos.Produtos = append(produtos.LProdutos.Produtos, &novoProduto)
+	produtos.LProdutos.AdicionarProduto(&novoProduto)
 
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "Novo produto adicionado com ID: %d", novoProduto.ID)
@@ -42,20 +41,11 @@ func RemoverProduto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i, produto := range produtos.LProdutos.Produtos {
-		if produto.ID == id {
-			produtos.LProdutos.Produtos = append(produtos.LProdutos.Produtos[:i], produtos.LProdutos.Produtos[i+1:]...)
+	produtos.LProdutos.RemoverProduto(id)
 
-			fmt.Fprintf(w, "Produto com ID %d removido com sucesso", id)
+	metricas.MetricasSistema.TotalProdutos--
 
-			// att metricas
-			metricas.MetricasSistema.TotalProdutos--
-			
-			return
-		}
-	}
-
-	http.Error(w, "Produto não encontrado", http.StatusNotFound)
+	fmt.Fprintf(w, "Produto com ID %d removido com sucesso", id)
 }
 
 func BuscarProduto(w http.ResponseWriter, r *http.Request) {
@@ -68,16 +58,16 @@ func BuscarProduto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, produto := range produtos.LProdutos.Produtos {
-		if produto.ID == id {
-			json.NewEncoder(w).Encode(produto)
-			return
-		}
+	produto, err := produtos.LProdutos.BuscarProdutoByID(id)
+	if err != nil {
+		http.Error(w, "Produto não encontrado", http.StatusNotFound)
+		return
 	}
 
-	http.Error(w, "Produto não encontrado", http.StatusNotFound)
+	json.NewEncoder(w).Encode(produto)
 }
 
 func ListarProdutos(w http.ResponseWriter, r *http.Request) {
-    json.NewEncoder(w).Encode(produtos.LProdutos.Produtos)
+	produtosList := produtos.LProdutos.ListarProdutos()
+	json.NewEncoder(w).Encode(produtosList)
 }
