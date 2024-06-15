@@ -3,7 +3,7 @@ package pedidos
 import (
 	"api/modelos/metricas"
 	"api/modelos/pedido"
-	"api/modelos/produto"
+	produtos "api/modelos/produto"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -68,24 +68,26 @@ func IncluirPedido(w http.ResponseWriter, r *http.Request) {
 }
 
 func ExibirPedidosAbertos(w http.ResponseWriter, r *http.Request) {
-	ordenacao := r.URL.Query().Get("ordenacao")
+    ordenacao := r.URL.Query().Get("ordenacao")
 
-	var pedidosAbertos []*pedido.Pedido
-	pedidosAbertos = append(pedidosAbertos, filaPedidos.Pedidos...)
+    var pedidosAbertos []*pedido.Pedido
+    pedidosAbertos = append(pedidosAbertos, filaPedidos.Pedidos...)
 
-	switch ordenacao {
-	case "bubblesort":
-		bubbleSort(pedidosAbertos)
-	case "quicksort":
-		quickSort(pedidosAbertos, 0, len(pedidosAbertos)-1)
-	}
+    switch ordenacao {
+    case "bubblesort":
+        bubbleSort(pedidosAbertos)
+    case "quicksort":
+        quickSort(pedidosAbertos, 0, len(pedidosAbertos)-1)
+    case "selectionsort":
+        selectionSort(pedidosAbertos)
+    }
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(pedidosAbertos); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+    if err := json.NewEncoder(w).Encode(pedidosAbertos); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
 }
 
 func bubbleSort(pedidos []*pedido.Pedido) {
@@ -105,6 +107,19 @@ func quickSort(pedidos []*pedido.Pedido, low, high int) {
 
 		quickSort(pedidos, low, pi-1)
 		quickSort(pedidos, pi+1, high)
+	}
+}
+
+func selectionSort(pedidos []*pedido.Pedido) {
+	n := len(pedidos)
+	for i := 0; i < n-1; i++ {
+		minIndex := i
+		for j := i + 1; j < n; j++ {
+			if pedidos[j].ValorTotal < pedidos[minIndex].ValorTotal {
+				minIndex = j
+			}
+		}
+		pedidos[i], pedidos[minIndex] = pedidos[minIndex], pedidos[i]
 	}
 }
 

@@ -103,6 +103,7 @@ Novo pedido incluído com ID: {id}
 
 - Para ordenar usando Bubble Sort: /pedidos?ordenacao=bubblesort
 - Para ordenar usando Quick Sort: /pedidos?ordenacao=quicksort
+- Para ordenar usando Selection Sort: /pedidos?ordenacao=selectionsort
 - Para a lista sem ordenação (ordem original pelo ID): /pedidos
 
 ## Integrantes
