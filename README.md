@@ -13,6 +13,7 @@ Utilize os comandos descritos abaixo para interagir com a API.
 | Rota            | Método | Funcionalidade                       |
 |-----------------|--------|--------------------------------------|
 | /abrir          | POST   | Abre a loja                          |
+| /abrir?intervalo=x | POST   | Abre a loja com o intervalo de x segundos                   |
 | /fechar         | POST   | Fecha a loja                         |
 | /produto        | POST   | Adiciona um novo produto             |
 | /produto/{id}   | DELETE | Remove um produto pelo ID            |
