@@ -3,7 +3,7 @@ package pedidos
 import (
 	"api/modelos/metricas"
 	"api/modelos/pedido"
-	"api/modelos/produto"
+	produtos "api/modelos/produto"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -46,6 +46,11 @@ func IncluirPedido(w http.ResponseWriter, r *http.Request) {
 	// taxa de entrega
 	if novoPedido.Delivery {
 		novoPedido.ValorTotal += 7
+	}
+
+	// desconto de 10% para pedidos acima de 100
+	if novoPedido.ValorTotal > 100 {
+		novoPedido.ValorTotal *= 0.9
 	}
 
 	novoPedido.Produtos = produtosValidos
