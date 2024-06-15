@@ -63,12 +63,19 @@ func IncluirPedido(w http.ResponseWriter, r *http.Request) {
 }
 
 func ExibirPedidosAbertos(w http.ResponseWriter, r *http.Request) {
-	var pedidosAbertos []*pedido.Pedido
+	ordenacao := r.URL.Query().Get("ordenacao")
 
+	var pedidosAbertos []*pedido.Pedido
 	pedidosAbertos = append(pedidosAbertos, filaPedidos.Pedidos...)
 
-	w.Header().Set("Content-Type", "application/json")
+	switch ordenacao {
+	case "bubblesort":
+		bubbleSort(pedidosAbertos)
+	case "quicksort":
+		quickSort(pedidosAbertos, 0, len(pedidosAbertos)-1)
+	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(pedidosAbertos); err != nil {
@@ -76,7 +83,40 @@ func ExibirPedidosAbertos(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Essa função não deveria ser um handler, afinal de contas isso não está aberto na API...
+func bubbleSort(pedidos []*pedido.Pedido) {
+	n := len(pedidos)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n-i-1; j++ {
+			if pedidos[j].ValorTotal > pedidos[j+1].ValorTotal {
+				pedidos[j], pedidos[j+1] = pedidos[j+1], pedidos[j]
+			}
+		}
+	}
+}
+
+func quickSort(pedidos []*pedido.Pedido, low, high int) {
+	if low < high {
+		pi := partition(pedidos, low, high)
+
+		quickSort(pedidos, low, pi-1)
+		quickSort(pedidos, pi+1, high)
+	}
+}
+
+func partition(pedidos []*pedido.Pedido, low, high int) int {
+	pivot := pedidos[high].ValorTotal
+	i := low - 1
+
+	for j := low; j <= high-1; j++ {
+		if pedidos[j].ValorTotal < pivot {
+			i++
+			pedidos[i], pedidos[j] = pedidos[j], pedidos[i]
+		}
+	}
+	pedidos[i+1], pedidos[high] = pedidos[high], pedidos[i+1]
+	return i + 1
+}
+
 func ExpedirPedido(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	pedidoID := params["id"]

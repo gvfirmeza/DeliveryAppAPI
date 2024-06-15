@@ -98,6 +98,12 @@ Resposta Esperada:
 Novo pedido incluído com ID: {id}
 ```
 
+### Listar Pedidos - GET /pedidos
+
+Para ordenar usando Bubble Sort: /pedidos?ordenacao=bubblesort
+Para ordenar usando Quick Sort: /pedidos?ordenacao=quicksort
+Para a lista sem ordenação (ordem original pelo ID): /pedidos
+
 ## Integrantes
 
 - Gabriel Firmamento
