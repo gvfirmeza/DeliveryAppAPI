@@ -1,15 +1,17 @@
 package processamento
 
 import (
+	"api/handlers/loja"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
-	"api/handlers/loja"
 )
 
 func LojaAberta() {
 	idPedido := 1
+	tm := time.Now()
+	timestamp := tm.Format("02/01/2006 15:04:05")
 	for {
 		if loja.StoreOpen {
 			// chamando rota para expedir pedidos "/pedido/{id}"
@@ -17,25 +19,25 @@ func LojaAberta() {
 
 			resp, err := http.Post(url, "application/json", nil)
 			if err != nil {
-				fmt.Println("Erro ao enviar pedido:", err)
+				fmt.Printf("Erro ao enviar pedido: %s %s\n", err, timestamp)
 				break
 			}
 			defer resp.Body.Close()
 
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				fmt.Println("Erro ao ler resposta:", err)
+				fmt.Printf("Erro ao ler resposta: %s %s\n", err, timestamp)
 				break
 			}
 
 			if resp.StatusCode == http.StatusOK {
-				fmt.Println("Pedido", idPedido, "expedido com sucesso.")
+				fmt.Println("Pedido", idPedido, "expedido com sucesso.", timestamp)
 				idPedido++
 			} else {
-				fmt.Println("Erro ao expedir pedido", idPedido, ":", string(body))
+				fmt.Println("Erro ao expedir pedido", idPedido, ":", string(body), timestamp)
 			}
 		} else {
-			fmt.Println("Loja fechada")
+			fmt.Printf("%s - Loja Fechada.\n", timestamp)
 		}
 		time.Sleep(30 * time.Second)
 	}
