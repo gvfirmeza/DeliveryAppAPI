@@ -3,7 +3,7 @@ package pedidos
 import (
 	"api/modelos/metricas"
 	"api/modelos/pedido"
-	produtos "api/modelos/produto"
+	"api/modelos/produto"
 	"encoding/json"
 	"fmt"
 	"net/http"
